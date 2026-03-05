@@ -1,35 +1,11 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Linkedin, Twitter } from "lucide-react";
 import { SiGithub } from "react-icons/si";
-
-const team = [
-  {
-    name: "Alex Chen",
-    role: "Founder & CEO",
-    initials: "AC",
-    color: "from-blue-500 to-indigo-600",
-  },
-  {
-    name: "Sarah Okonkwo",
-    role: "Creative Director",
-    initials: "SO",
-    color: "from-rose-500 to-pink-600",
-  },
-  {
-    name: "James Rivera",
-    role: "Lead Developer",
-    initials: "JR",
-    color: "from-emerald-500 to-teal-600",
-  },
-  {
-    name: "Maya Patel",
-    role: "UX Lead",
-    initials: "MP",
-    color: "from-violet-500 to-purple-600",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import type { TeamMember } from "@shared/schema";
 
 const containerVariants = {
   hidden: {},
@@ -42,6 +18,8 @@ const itemVariants = {
 };
 
 export function AboutSection() {
+  const { data: team, isLoading } = useQuery<TeamMember[]>({ queryKey: ["/api/team"] });
+
   return (
     <section id="about" className="py-24 lg:py-32" data-testid="section-about">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -88,41 +66,19 @@ export function AboutSection() {
             className="grid grid-cols-2 gap-4"
           >
             {[
-              {
-                value: "98%",
-                label: "Client Satisfaction",
-                desc: "Based on project feedback",
-              },
-              {
-                value: "2x",
-                label: "Faster Delivery",
-                desc: "Compared to industry average",
-              },
-              {
-                value: "24/7",
-                label: "Support Available",
-                desc: "For all active projects",
-              },
-              {
-                value: "40+",
-                label: "Technologies",
-                desc: "In our tech stack",
-              },
+              { value: "98%", label: "Client Satisfaction", desc: "Based on project feedback" },
+              { value: "2x", label: "Faster Delivery", desc: "Compared to industry average" },
+              { value: "24/7", label: "Support Available", desc: "For all active projects" },
+              { value: "40+", label: "Technologies", desc: "In our tech stack" },
             ].map((item) => (
               <Card
                 key={item.label}
                 className="p-5 border-border/50 text-center"
                 data-testid={`card-stat-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <div className="text-2xl font-bold text-primary mb-1">
-                  {item.value}
-                </div>
-                <div className="text-sm font-semibold text-foreground">
-                  {item.label}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {item.desc}
-                </div>
+                <div className="text-2xl font-bold text-primary mb-1">{item.value}</div>
+                <div className="text-sm font-semibold text-foreground">{item.label}</div>
+                <div className="text-xs text-muted-foreground mt-1">{item.desc}</div>
               </Card>
             ))}
           </motion.div>
@@ -144,59 +100,55 @@ export function AboutSection() {
             </p>
           </motion.div>
 
-          <motion.div
-            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {team.map((member) => (
-              <motion.div key={member.name} variants={itemVariants}>
-                <Card
-                  className="p-6 text-center border-border/50 hover-elevate transition-all duration-300 group"
-                  data-testid={`card-team-${member.name.toLowerCase().replace(/\s+/g, "-")}`}
-                >
-                  <Avatar className="w-20 h-20 mx-auto mb-4">
-                    <AvatarFallback
-                      className={`bg-gradient-to-br ${member.color} text-white text-lg font-bold`}
-                    >
-                      {member.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <h4 className="font-semibold text-foreground text-lg">
-                    {member.name}
-                  </h4>
-                  <p className="text-sm text-muted-foreground mt-1 mb-4">
-                    {member.role}
-                  </p>
-                  <div className="flex justify-center gap-3">
-                    <a
-                      href="#"
-                      className="text-muted-foreground transition-colors"
-                      data-testid={`link-linkedin-${member.name.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      <Linkedin className="w-4 h-4" />
-                    </a>
-                    <a
-                      href="#"
-                      className="text-muted-foreground transition-colors"
-                      data-testid={`link-twitter-${member.name.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      <Twitter className="w-4 h-4" />
-                    </a>
-                    <a
-                      href="#"
-                      className="text-muted-foreground transition-colors"
-                      data-testid={`link-github-${member.name.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      <SiGithub className="w-4 h-4" />
-                    </a>
-                  </div>
+          {isLoading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="p-6 text-center border-border/50">
+                  <Skeleton className="w-20 h-20 rounded-full mx-auto mb-4" />
+                  <Skeleton className="h-5 w-32 mx-auto mb-2" />
+                  <Skeleton className="h-4 w-24 mx-auto" />
                 </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              {team?.map((member) => (
+                <motion.div key={member.id} variants={itemVariants}>
+                  <Card
+                    className="p-6 text-center border-border/50 hover-elevate transition-all duration-300 group"
+                    data-testid={`card-team-${member.id}`}
+                  >
+                    <Avatar className="w-20 h-20 mx-auto mb-4">
+                      <AvatarFallback
+                        className={`bg-gradient-to-br ${member.color} text-white text-lg font-bold`}
+                      >
+                        {member.initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <h4 className="font-semibold text-foreground text-lg">{member.name}</h4>
+                    <p className="text-sm text-muted-foreground mt-1 mb-4">{member.role}</p>
+                    <div className="flex justify-center gap-3">
+                      <a href="#" className="text-muted-foreground transition-colors">
+                        <Linkedin className="w-4 h-4" />
+                      </a>
+                      <a href="#" className="text-muted-foreground transition-colors">
+                        <Twitter className="w-4 h-4" />
+                      </a>
+                      <a href="#" className="text-muted-foreground transition-colors">
+                        <SiGithub className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
       </div>
     </section>

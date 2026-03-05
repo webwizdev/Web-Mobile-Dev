@@ -1,8 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { HeroContent, Stat } from "@shared/schema";
 
 export function HeroSection() {
+  const { data: hero } = useQuery<HeroContent>({ queryKey: ["/api/hero"] });
+  const { data: stats } = useQuery<Stat[]>({ queryKey: ["/api/stats"] });
+
   const scrollToSection = (href: string) => {
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -27,8 +33,8 @@ export function HeroSection() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
               <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">
-                Award-Winning Digital Agency
+              <span className="text-sm font-medium text-primary" data-testid="text-hero-badge">
+                {hero?.badgeText || "Award-Winning Digital Agency"}
               </span>
             </div>
           </motion.div>
@@ -38,13 +44,14 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
+            data-testid="text-hero-title"
           >
-            We Craft Digital
+            {hero?.titleLine1 || "We Craft Digital"}
             <br />
             <span className="bg-gradient-to-r from-primary via-chart-2 to-chart-3 bg-clip-text text-transparent">
-              Experiences
+              {hero?.titleHighlight || "Experiences"}
             </span>{" "}
-            That Matter
+            {hero?.titleLine3 || "That Matter"}
           </motion.h1>
 
           <motion.p
@@ -52,10 +59,9 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
+            data-testid="text-hero-subtitle"
           >
-            FIO Creatives transforms bold ideas into stunning web and mobile
-            applications. We blend design excellence with cutting-edge technology
-            to deliver products that users love.
+            {hero?.subtitle || "FIO Creatives transforms bold ideas into stunning web and mobile applications. We blend design excellence with cutting-edge technology to deliver products that users love."}
           </motion.p>
 
           <motion.div
@@ -69,7 +75,7 @@ export function HeroSection() {
               onClick={() => scrollToSection("#contact")}
               data-testid="button-hero-cta"
             >
-              Start a Project
+              {hero?.ctaPrimary || "Start a Project"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
@@ -78,7 +84,7 @@ export function HeroSection() {
               onClick={() => scrollToSection("#portfolio")}
               data-testid="button-hero-portfolio"
             >
-              View Our Work
+              {hero?.ctaSecondary || "View Our Work"}
             </Button>
           </motion.div>
 
@@ -88,13 +94,8 @@ export function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            {[
-              { value: "150+", label: "Projects Delivered" },
-              { value: "50+", label: "Happy Clients" },
-              { value: "8+", label: "Years Experience" },
-              { value: "15+", label: "Team Members" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
+            {stats ? stats.map((stat) => (
+              <div key={stat.id} className="text-center">
                 <div
                   className="text-2xl md:text-3xl font-bold text-foreground"
                   data-testid={`text-stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}
@@ -105,7 +106,14 @@ export function HeroSection() {
                   {stat.label}
                 </div>
               </div>
-            ))}
+            )) : (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="text-center space-y-2">
+                  <Skeleton className="h-8 w-16 mx-auto" />
+                  <Skeleton className="h-4 w-24 mx-auto" />
+                </div>
+              ))
+            )}
           </motion.div>
         </div>
       </div>

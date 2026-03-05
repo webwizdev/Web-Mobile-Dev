@@ -2,60 +2,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { Project } from "@shared/schema";
 
 type Category = "all" | "web" | "mobile" | "design";
-
-const projects = [
-  {
-    id: 1,
-    title: "Finova Banking",
-    category: "web" as Category,
-    description: "A modern fintech platform with real-time dashboards and secure payment processing.",
-    tags: ["React", "Node.js", "PostgreSQL"],
-    gradient: "from-blue-600 to-cyan-500",
-  },
-  {
-    id: 2,
-    title: "HealthPulse",
-    category: "mobile" as Category,
-    description: "Health tracking app with AI-powered insights and wearable device integration.",
-    tags: ["React Native", "Python", "ML"],
-    gradient: "from-emerald-500 to-teal-600",
-  },
-  {
-    id: 3,
-    title: "Artisan Marketplace",
-    category: "web" as Category,
-    description: "E-commerce platform connecting local artisans with global buyers.",
-    tags: ["Next.js", "Stripe", "AWS"],
-    gradient: "from-orange-500 to-rose-500",
-  },
-  {
-    id: 4,
-    title: "TravelMate",
-    category: "mobile" as Category,
-    description: "Travel companion app with smart itinerary planning and offline maps.",
-    tags: ["Flutter", "Firebase", "Google Maps"],
-    gradient: "from-violet-600 to-purple-500",
-  },
-  {
-    id: 5,
-    title: "EduSphere",
-    category: "design" as Category,
-    description: "Complete design system and UI/UX overhaul for an online learning platform.",
-    tags: ["Figma", "Design System", "Accessibility"],
-    gradient: "from-pink-500 to-rose-600",
-  },
-  {
-    id: 6,
-    title: "GreenGrid Energy",
-    category: "web" as Category,
-    description: "IoT dashboard for monitoring renewable energy installations across facilities.",
-    tags: ["Vue.js", "D3.js", "IoT"],
-    gradient: "from-green-500 to-emerald-600",
-  },
-];
 
 const filters: { label: string; value: Category }[] = [
   { label: "All Projects", value: "all" },
@@ -66,11 +18,12 @@ const filters: { label: string; value: Category }[] = [
 
 export function PortfolioSection() {
   const [activeFilter, setActiveFilter] = useState<Category>("all");
+  const { data: projects, isLoading } = useQuery<Project[]>({ queryKey: ["/api/projects"] });
 
   const filtered =
     activeFilter === "all"
-      ? projects
-      : projects.filter((p) => p.category === activeFilter);
+      ? projects || []
+      : (projects || []).filter((p) => p.category === activeFilter);
 
   return (
     <section
@@ -114,64 +67,82 @@ export function PortfolioSection() {
           ))}
         </div>
 
-        <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <AnimatePresence mode="popLayout">
-            {filtered.map((project) => (
-              <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Card
-                  className="group cursor-pointer border-border/50 hover-elevate transition-all duration-300"
-                  data-testid={`card-project-${project.id}`}
+        {isLoading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="border-border/50">
+                <Skeleton className="h-48 rounded-t-md" />
+                <div className="p-5 space-y-3">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-4 w-full" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((project) => (
+                <motion.div
+                  key={project.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <div
-                    className={`h-48 rounded-t-md bg-gradient-to-br ${project.gradient} relative`}
+                  <Card
+                    className="group cursor-pointer border-border/50 hover-elevate transition-all duration-300"
+                    data-testid={`card-project-${project.id}`}
                   >
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-t-md flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <ExternalLink className="w-5 h-5 text-white" />
+                    <div
+                      className={`h-48 rounded-t-md bg-gradient-to-br ${project.gradient} relative`}
+                    >
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-t-md flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                            <ExternalLink className="w-5 h-5 text-white" />
+                          </div>
                         </div>
                       </div>
+                      <div className="absolute bottom-4 left-4">
+                        <Badge variant="secondary" className="bg-white/20 text-white backdrop-blur-sm border-white/10">
+                          {project.category === "web"
+                            ? "Web App"
+                            : project.category === "mobile"
+                              ? "Mobile App"
+                              : "Design"}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="absolute bottom-4 left-4">
-                      <Badge variant="secondary" className="bg-white/20 text-white backdrop-blur-sm border-white/10">
-                        {project.category === "web"
-                          ? "Web App"
-                          : project.category === "mobile"
-                            ? "Mobile App"
-                            : "Design"}
-                      </Badge>
+                    <div className="p-5">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        {project.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                        {project.description}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
-                      {project.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                      {project.description}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {project.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
       </div>
     </section>
   );

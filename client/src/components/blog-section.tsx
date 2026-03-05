@@ -1,40 +1,10 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Clock } from "lucide-react";
-
-const blogPosts = [
-  {
-    id: 1,
-    title: "The Future of Progressive Web Apps in 2025",
-    excerpt:
-      "PWAs are evolving rapidly. Here's how they're changing the way we build for the web and why your next project should consider one.",
-    category: "Engineering",
-    readTime: "5 min read",
-    date: "Feb 20, 2026",
-    gradient: "from-blue-600 to-indigo-600",
-  },
-  {
-    id: 2,
-    title: "Design Systems That Scale: Lessons from 50+ Projects",
-    excerpt:
-      "Building a design system that works across teams and products requires careful planning. We share our approach and key takeaways.",
-    category: "Design",
-    readTime: "8 min read",
-    date: "Feb 12, 2026",
-    gradient: "from-rose-500 to-pink-600",
-  },
-  {
-    id: 3,
-    title: "Why We Switched to React Native for Cross-Platform",
-    excerpt:
-      "After years of native development, our shift to React Native transformed our mobile workflow. Here's the full story.",
-    category: "Mobile",
-    readTime: "6 min read",
-    date: "Jan 28, 2026",
-    gradient: "from-emerald-500 to-teal-600",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import type { BlogPost } from "@shared/schema";
 
 const containerVariants = {
   hidden: {},
@@ -47,6 +17,8 @@ const itemVariants = {
 };
 
 export function BlogSection() {
+  const { data: blogPosts, isLoading } = useQuery<BlogPost[]>({ queryKey: ["/api/blog"] });
+
   return (
     <section id="blog" className="py-24 lg:py-32" data-testid="section-blog">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -69,54 +41,70 @@ export function BlogSection() {
           </p>
         </motion.div>
 
-        <motion.div
-          className="grid md:grid-cols-3 gap-6"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-        >
-          {blogPosts.map((post) => (
-            <motion.div key={post.id} variants={itemVariants}>
-              <Card
-                className="group cursor-pointer border-border/50 hover-elevate transition-all duration-300 h-full flex flex-col"
-                data-testid={`card-blog-${post.id}`}
-              >
-                <div
-                  className={`h-40 rounded-t-md bg-gradient-to-br ${post.gradient} relative`}
-                >
-                  <div className="absolute bottom-3 left-3">
-                    <Badge
-                      variant="secondary"
-                      className="bg-white/20 text-white backdrop-blur-sm border-white/10"
-                    >
-                      {post.category}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="p-5 flex flex-col flex-1">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                    <span>{post.date}</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {post.readTime}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2 leading-tight">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">
-                    {post.excerpt}
-                  </p>
-                  <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
-                    Read More
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
+        {isLoading ? (
+          <div className="grid md:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i} className="border-border/50">
+                <Skeleton className="h-40 rounded-t-md" />
+                <div className="p-5 space-y-3">
+                  <Skeleton className="h-3 w-32" />
+                  <Skeleton className="h-5 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
                 </div>
               </Card>
-            </motion.div>
-          ))}
-        </motion.div>
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            className="grid md:grid-cols-3 gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {blogPosts?.map((post) => (
+              <motion.div key={post.id} variants={itemVariants}>
+                <Card
+                  className="group cursor-pointer border-border/50 hover-elevate transition-all duration-300 h-full flex flex-col"
+                  data-testid={`card-blog-${post.id}`}
+                >
+                  <div
+                    className={`h-40 rounded-t-md bg-gradient-to-br ${post.gradient} relative`}
+                  >
+                    <div className="absolute bottom-3 left-3">
+                      <Badge
+                        variant="secondary"
+                        className="bg-white/20 text-white backdrop-blur-sm border-white/10"
+                      >
+                        {post.category}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                      <span>{post.date}</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {post.readTime}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground mb-2 leading-tight">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                      {post.excerpt}
+                    </p>
+                    <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
+                      Read More
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );
