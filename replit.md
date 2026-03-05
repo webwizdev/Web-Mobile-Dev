@@ -25,7 +25,7 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 
 ## Admin Panel (/admin)
 - **Login**: admin / fio2026 (configurable via ADMIN_USERNAME / ADMIN_PASSWORD env vars)
-- **Sections**: Hero, Stats, Services, Portfolio, Team, Testimonials, Blog, Messages
+- **Sections**: Hero, Stats, Services, Portfolio, Team, Testimonials, Blog, Footer, Messages
 - **Features**: Full CRUD (create, read, update, delete) for all content types
 - **UI**: Tabbed interface with dialog-based editing forms
 
@@ -39,6 +39,8 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 - `GET /api/testimonials` - Get testimonials
 - `GET /api/blog` - Get blog posts
 - `POST /api/contact` - Submit contact form
+- `GET /api/footer` - Get footer content + links
+- `GET /api/footer-links` - Get footer links
 
 ### Admin (requires session auth)
 - `POST /api/admin/login` - Login
@@ -51,11 +53,13 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 - `POST/PATCH/DELETE /api/team/:id` - CRUD team members
 - `POST/PATCH/DELETE /api/testimonials/:id` - CRUD testimonials
 - `POST/PATCH/DELETE /api/blog/:id` - CRUD blog posts
+- `PUT /api/footer` - Update footer content
+- `POST/PATCH/DELETE /api/footer-links/:id` - CRUD footer links
 - `GET/DELETE /api/messages/:id` - View/delete contact messages
 
 ## Database
 - PostgreSQL with Drizzle ORM
-- Tables: users, hero_content, stats, services, projects, team_members, testimonials, blog_posts, contact_messages
+- Tables: users, hero_content, stats, services, projects, team_members, testimonials, blog_posts, contact_messages, footer_content, footer_links
 - Schema defined in `shared/schema.ts` using `pgTable`
 - Connection via `server/db.ts` using Neon serverless driver
 - Auto-seeds on first run if hero_content table is empty (`server/seed.ts`)

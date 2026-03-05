@@ -2,6 +2,7 @@ import { db } from "./db";
 import {
   heroContent, stats, services, projects,
   teamMembers, testimonials, blogPosts,
+  footerContent, footerLinks,
 } from "@shared/schema";
 
 export async function seedDatabase() {
@@ -66,6 +67,32 @@ export async function seedDatabase() {
     { title: "The Future of Progressive Web Apps in 2025", excerpt: "PWAs are evolving rapidly. Here's how they're changing the way we build for the web and why your next project should consider one.", category: "Engineering", readTime: "5 min read", date: "Feb 20, 2026", gradient: "from-blue-600 to-indigo-600", sortOrder: 0 },
     { title: "Design Systems That Scale: Lessons from 50+ Projects", excerpt: "Building a design system that works across teams and products requires careful planning. We share our approach and key takeaways.", category: "Design", readTime: "8 min read", date: "Feb 12, 2026", gradient: "from-rose-500 to-pink-600", sortOrder: 1 },
     { title: "Why We Switched to React Native for Cross-Platform", excerpt: "After years of native development, our shift to React Native transformed our mobile workflow. Here's the full story.", category: "Mobile", readTime: "6 min read", date: "Jan 28, 2026", gradient: "from-emerald-500 to-teal-600", sortOrder: 2 },
+  ]);
+
+  await db.insert(footerContent).values({
+    tagline: "Crafting exceptional digital experiences through innovative design and cutting-edge development.",
+    copyrightText: "2026 FIO Creatives. All rights reserved.",
+    locationText: "Made with passion in San Francisco",
+    twitterUrl: "#",
+    linkedinUrl: "#",
+    instagramUrl: "#",
+    githubUrl: "#",
+    dribbbleUrl: "#",
+  });
+
+  await db.insert(footerLinks).values([
+    { section: "services", label: "Web Development", href: "#services", sortOrder: 0 },
+    { section: "services", label: "Mobile Development", href: "#services", sortOrder: 1 },
+    { section: "services", label: "UI/UX Design", href: "#services", sortOrder: 2 },
+    { section: "services", label: "Digital Strategy", href: "#services", sortOrder: 3 },
+    { section: "company", label: "About Us", href: "#about", sortOrder: 0 },
+    { section: "company", label: "Our Team", href: "#about", sortOrder: 1 },
+    { section: "company", label: "Blog", href: "#blog", sortOrder: 2 },
+    { section: "company", label: "Careers", href: "#", sortOrder: 3 },
+    { section: "support", label: "Contact", href: "#contact", sortOrder: 0 },
+    { section: "support", label: "Privacy Policy", href: "#", sortOrder: 1 },
+    { section: "support", label: "Terms of Service", href: "#", sortOrder: 2 },
+    { section: "support", label: "FAQ", href: "#", sortOrder: 3 },
   ]);
 
   console.log("Database seeded successfully.");

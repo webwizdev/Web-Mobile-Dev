@@ -8,8 +8,10 @@ import {
   type TeamMember, type InsertTeamMember,
   type Testimonial, type InsertTestimonial,
   type BlogPost, type InsertBlogPost,
+  type FooterContent, type InsertFooterContent,
+  type FooterLink, type InsertFooterLink,
   users, contactMessages, heroContent, stats, services, projects,
-  teamMembers, testimonials, blogPosts,
+  teamMembers, testimonials, blogPosts, footerContent, footerLinks,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc } from "drizzle-orm";
@@ -55,6 +57,14 @@ export interface IStorage {
   createBlogPost(data: InsertBlogPost): Promise<BlogPost>;
   updateBlogPost(id: string, data: Partial<InsertBlogPost>): Promise<BlogPost | undefined>;
   deleteBlogPost(id: string): Promise<boolean>;
+
+  getFooterContent(): Promise<FooterContent>;
+  updateFooterContent(data: InsertFooterContent): Promise<FooterContent>;
+
+  getFooterLinks(): Promise<FooterLink[]>;
+  createFooterLink(data: InsertFooterLink): Promise<FooterLink>;
+  updateFooterLink(id: string, data: Partial<InsertFooterLink>): Promise<FooterLink | undefined>;
+  deleteFooterLink(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -221,6 +231,49 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBlogPost(id: string): Promise<boolean> {
     const result = await db.delete(blogPosts).where(eq(blogPosts.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getFooterContent(): Promise<FooterContent> {
+    const [footer] = await db.select().from(footerContent);
+    if (!footer) {
+      const [created] = await db.insert(footerContent).values({
+        tagline: "Crafting exceptional digital experiences through innovative design and cutting-edge development.",
+        copyrightText: "2026 FIO Creatives. All rights reserved.",
+        locationText: "Made with passion in San Francisco",
+        twitterUrl: "#",
+        linkedinUrl: "#",
+        instagramUrl: "#",
+        githubUrl: "#",
+        dribbbleUrl: "#",
+      }).returning();
+      return created;
+    }
+    return footer;
+  }
+
+  async updateFooterContent(data: InsertFooterContent): Promise<FooterContent> {
+    const existing = await this.getFooterContent();
+    const [updated] = await db.update(footerContent).set(data).where(eq(footerContent.id, existing.id)).returning();
+    return updated;
+  }
+
+  async getFooterLinks(): Promise<FooterLink[]> {
+    return db.select().from(footerLinks).orderBy(asc(footerLinks.section), asc(footerLinks.sortOrder));
+  }
+
+  async createFooterLink(data: InsertFooterLink): Promise<FooterLink> {
+    const [link] = await db.insert(footerLinks).values(data).returning();
+    return link;
+  }
+
+  async updateFooterLink(id: string, data: Partial<InsertFooterLink>): Promise<FooterLink | undefined> {
+    const [updated] = await db.update(footerLinks).set(data).where(eq(footerLinks.id, id)).returning();
+    return updated;
+  }
+
+  async deleteFooterLink(id: string): Promise<boolean> {
+    const result = await db.delete(footerLinks).where(eq(footerLinks.id, id)).returning();
     return result.length > 0;
   }
 }

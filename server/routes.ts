@@ -12,6 +12,8 @@ import {
   insertTeamMemberSchema,
   insertTestimonialSchema,
   insertBlogPostSchema,
+  insertFooterContentSchema,
+  insertFooterLinkSchema,
 } from "@shared/schema";
 import { ZodError } from "zod";
 
@@ -286,6 +288,56 @@ export async function registerRoutes(
 
   app.delete("/api/blog/:id", requireAdmin, async (req, res) => {
     const deleted = await storage.deleteBlogPost(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Not found" });
+    res.json({ success: true });
+  });
+
+  app.get("/api/footer", async (_req, res) => {
+    const [content, links] = await Promise.all([
+      storage.getFooterContent(),
+      storage.getFooterLinks(),
+    ]);
+    res.json({ content, links });
+  });
+
+  app.put("/api/footer", requireAdmin, async (req, res) => {
+    try {
+      const parsed = insertFooterContentSchema.parse(req.body);
+      res.json(await storage.updateFooterContent(parsed));
+    } catch (error) {
+      if (error instanceof ZodError) res.status(400).json({ message: "Invalid data" });
+      else res.status(500).json({ message: "Failed to update" });
+    }
+  });
+
+  app.get("/api/footer-links", async (_req, res) => {
+    res.json(await storage.getFooterLinks());
+  });
+
+  app.post("/api/footer-links", requireAdmin, async (req, res) => {
+    try {
+      const parsed = insertFooterLinkSchema.parse(req.body);
+      res.status(201).json(await storage.createFooterLink(parsed));
+    } catch (error) {
+      if (error instanceof ZodError) res.status(400).json({ message: "Invalid data" });
+      else res.status(500).json({ message: "Failed to create" });
+    }
+  });
+
+  app.patch("/api/footer-links/:id", requireAdmin, async (req, res) => {
+    try {
+      const parsed = insertFooterLinkSchema.partial().parse(req.body);
+      const result = await storage.updateFooterLink(req.params.id, parsed);
+      if (!result) return res.status(404).json({ message: "Not found" });
+      res.json(result);
+    } catch (error) {
+      if (error instanceof ZodError) res.status(400).json({ message: "Invalid data" });
+      else res.status(500).json({ message: "Failed to update" });
+    }
+  });
+
+  app.delete("/api/footer-links/:id", requireAdmin, async (req, res) => {
+    const deleted = await storage.deleteFooterLink(req.params.id);
     if (!deleted) return res.status(404).json({ message: "Not found" });
     res.json({ success: true });
   });

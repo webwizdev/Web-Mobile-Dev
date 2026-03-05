@@ -54,6 +54,8 @@ import type {
   Testimonial,
   BlogPost,
   ContactMessage,
+  FooterContent,
+  FooterLink,
 } from "@shared/schema";
 
 const GRADIENT_OPTIONS = [
@@ -469,6 +471,163 @@ function MessagesViewer() {
   );
 }
 
+function FooterEditor() {
+  const { data: footerData, isLoading: loadingContent } = useQuery<{ content: FooterContent; links: FooterLink[] }>({ queryKey: ["/api/footer"] });
+  const { data: footerLinksData = [], isLoading: loadingLinks } = useQuery<FooterLink[]>({ queryKey: ["/api/footer-links"] });
+  const [editingContent, setEditingContent] = useState(false);
+  const [contentForm, setContentForm] = useState<Partial<FooterContent>>({});
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [editLink, setEditLink] = useState<FooterLink | null>(null);
+  const [linkForm, setLinkForm] = useState({ section: "services", label: "", href: "#", sortOrder: 0 });
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const content = footerData?.content;
+
+  const updateContentMutation = useMutation({
+    mutationFn: async (data: Partial<FooterContent>) => {
+      await apiRequest("PUT", "/api/footer", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/footer"] });
+      setEditingContent(false);
+      toast({ title: "Footer content updated" });
+    },
+  });
+
+  const createLinkMutation = useMutation({
+    mutationFn: async () => { await apiRequest("POST", "/api/footer-links", linkForm); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/footer-links"] }); queryClient.invalidateQueries({ queryKey: ["/api/footer"] }); setLinkDialogOpen(false); toast({ title: "Footer link created" }); },
+  });
+
+  const updateLinkMutation = useMutation({
+    mutationFn: async () => { if (editLink) await apiRequest("PATCH", `/api/footer-links/${editLink.id}`, linkForm); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/footer-links"] }); queryClient.invalidateQueries({ queryKey: ["/api/footer"] }); setLinkDialogOpen(false); setEditLink(null); toast({ title: "Footer link updated" }); },
+  });
+
+  const deleteLinkMutation = useMutation({
+    mutationFn: async (id: string) => { await apiRequest("DELETE", `/api/footer-links/${id}`); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/footer-links"] }); queryClient.invalidateQueries({ queryKey: ["/api/footer"] }); setDeleteId(null); toast({ title: "Footer link deleted" }); },
+  });
+
+  const startEditContent = () => { if (content) { setContentForm(content); setEditingContent(true); } };
+  const openCreateLink = () => { setEditLink(null); setLinkForm({ section: "services", label: "", href: "#", sortOrder: footerLinksData.length }); setLinkDialogOpen(true); };
+  const openEditLink = (link: FooterLink) => { setEditLink(link); setLinkForm({ section: link.section, label: link.label, href: link.href, sortOrder: link.sortOrder }); setLinkDialogOpen(true); };
+
+  if (loadingContent || loadingLinks) return <div className="text-muted-foreground p-4">Loading...</div>;
+
+  const sectionOptions = [
+    { value: "services", label: "Services" },
+    { value: "company", label: "Company" },
+    { value: "support", label: "Support" },
+  ];
+
+  return (
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <h3 className="text-lg font-semibold text-foreground">Footer Content</h3>
+          <Button onClick={startEditContent} data-testid="button-edit-footer"><Pencil className="w-4 h-4 mr-2" />Edit Footer</Button>
+        </div>
+        {content && (
+          <Card className="p-6 border-border/50 space-y-3">
+            <div><span className="text-sm text-muted-foreground">Tagline: </span><span className="text-foreground text-sm">{content.tagline}</span></div>
+            <div><span className="text-sm text-muted-foreground">Copyright: </span><span className="text-foreground">{content.copyrightText}</span></div>
+            <div><span className="text-sm text-muted-foreground">Location: </span><span className="text-foreground">{content.locationText}</span></div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2">
+              <div><span className="text-xs text-muted-foreground">Twitter: </span><span className="text-foreground text-xs truncate">{content.twitterUrl}</span></div>
+              <div><span className="text-xs text-muted-foreground">LinkedIn: </span><span className="text-foreground text-xs truncate">{content.linkedinUrl}</span></div>
+              <div><span className="text-xs text-muted-foreground">Instagram: </span><span className="text-foreground text-xs truncate">{content.instagramUrl}</span></div>
+              <div><span className="text-xs text-muted-foreground">GitHub: </span><span className="text-foreground text-xs truncate">{content.githubUrl}</span></div>
+              <div><span className="text-xs text-muted-foreground">Dribbble: </span><span className="text-foreground text-xs truncate">{content.dribbbleUrl}</span></div>
+            </div>
+          </Card>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <h3 className="text-lg font-semibold text-foreground">Footer Links</h3>
+          <Button onClick={openCreateLink} data-testid="button-add-footer-link"><Plus className="w-4 h-4 mr-2" />Add Link</Button>
+        </div>
+        {["services", "company", "support"].map((section) => {
+          const sectionLinks = footerLinksData.filter((l) => l.section === section);
+          if (sectionLinks.length === 0) return null;
+          return (
+            <div key={section}>
+              <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">{section}</h4>
+              <div className="space-y-2">
+                {sectionLinks.map((link) => (
+                  <Card key={link.id} className="p-3 border-border/50 flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium text-foreground text-sm">{link.label}</span>
+                      <span className="text-xs text-muted-foreground ml-2">{link.href}</span>
+                    </div>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <Button size="icon" variant="ghost" onClick={() => openEditLink(link)} data-testid={`button-edit-link-${link.id}`}><Pencil className="w-4 h-4" /></Button>
+                      <Button size="icon" variant="ghost" onClick={() => setDeleteId(link.id)} data-testid={`button-delete-link-${link.id}`}><Trash2 className="w-4 h-4" /></Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Dialog open={editingContent} onOpenChange={setEditingContent}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Edit Footer Content</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2"><Label>Tagline</Label><Textarea value={contentForm.tagline || ""} onChange={(e) => setContentForm({ ...contentForm, tagline: e.target.value })} className="min-h-[60px] resize-none" data-testid="input-footer-tagline" /></div>
+            <div className="space-y-2"><Label>Copyright Text</Label><Input value={contentForm.copyrightText || ""} onChange={(e) => setContentForm({ ...contentForm, copyrightText: e.target.value })} data-testid="input-footer-copyright" /></div>
+            <div className="space-y-2"><Label>Location Text</Label><Input value={contentForm.locationText || ""} onChange={(e) => setContentForm({ ...contentForm, locationText: e.target.value })} data-testid="input-footer-location" /></div>
+            <div className="space-y-2"><Label>Twitter URL</Label><Input value={contentForm.twitterUrl || ""} onChange={(e) => setContentForm({ ...contentForm, twitterUrl: e.target.value })} placeholder="https://twitter.com/..." data-testid="input-footer-twitter" /></div>
+            <div className="space-y-2"><Label>LinkedIn URL</Label><Input value={contentForm.linkedinUrl || ""} onChange={(e) => setContentForm({ ...contentForm, linkedinUrl: e.target.value })} placeholder="https://linkedin.com/..." data-testid="input-footer-linkedin" /></div>
+            <div className="space-y-2"><Label>Instagram URL</Label><Input value={contentForm.instagramUrl || ""} onChange={(e) => setContentForm({ ...contentForm, instagramUrl: e.target.value })} placeholder="https://instagram.com/..." data-testid="input-footer-instagram" /></div>
+            <div className="space-y-2"><Label>GitHub URL</Label><Input value={contentForm.githubUrl || ""} onChange={(e) => setContentForm({ ...contentForm, githubUrl: e.target.value })} placeholder="https://github.com/..." data-testid="input-footer-github" /></div>
+            <div className="space-y-2"><Label>Dribbble URL</Label><Input value={contentForm.dribbbleUrl || ""} onChange={(e) => setContentForm({ ...contentForm, dribbbleUrl: e.target.value })} placeholder="https://dribbble.com/..." data-testid="input-footer-dribbble" /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingContent(false)}>Cancel</Button>
+            <Button onClick={() => updateContentMutation.mutate(contentForm)} disabled={updateContentMutation.isPending} data-testid="button-save-footer">
+              {updateContentMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editLink ? "Edit Footer Link" : "Add Footer Link"}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Section</Label>
+              <Select value={linkForm.section} onValueChange={(v) => setLinkForm({ ...linkForm, section: v })}>
+                <SelectTrigger data-testid="select-link-section"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {sectionOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2"><Label>Label</Label><Input value={linkForm.label} onChange={(e) => setLinkForm({ ...linkForm, label: e.target.value })} placeholder="Link text" data-testid="input-link-label" /></div>
+            <div className="space-y-2"><Label>Href</Label><Input value={linkForm.href} onChange={(e) => setLinkForm({ ...linkForm, href: e.target.value })} placeholder="#services or https://..." data-testid="input-link-href" /></div>
+            <div className="space-y-2"><Label>Sort Order</Label><Input type="number" value={linkForm.sortOrder} onChange={(e) => setLinkForm({ ...linkForm, sortOrder: parseInt(e.target.value) || 0 })} data-testid="input-link-sort" /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLinkDialogOpen(false)}>Cancel</Button>
+            <Button onClick={() => editLink ? updateLinkMutation.mutate() : createLinkMutation.mutate()} disabled={createLinkMutation.isPending || updateLinkMutation.isPending} data-testid="button-save-footer-link">Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <DeleteConfirm open={!!deleteId} onCancel={() => setDeleteId(null)} onConfirm={() => deleteId && deleteLinkMutation.mutate(deleteId)} isPending={deleteLinkMutation.isPending} />
+    </div>
+  );
+}
+
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const { toast } = useToast();
 
@@ -550,6 +709,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <TabsTrigger value="team" data-testid="tab-team">Team</TabsTrigger>
             <TabsTrigger value="testimonials" data-testid="tab-testimonials">Testimonials</TabsTrigger>
             <TabsTrigger value="blog" data-testid="tab-blog">Blog</TabsTrigger>
+            <TabsTrigger value="footer" data-testid="tab-footer">Footer</TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-messages">
               <Mail className="w-4 h-4 mr-1" />Messages
             </TabsTrigger>
@@ -618,6 +778,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               getDefaults={(count) => ({ title: "", excerpt: "", category: "", readTime: "", date: "", gradient: "from-blue-600 to-indigo-600", sortOrder: count })}
               getFormValues={(b) => ({ title: b.title, excerpt: b.excerpt, category: b.category, readTime: b.readTime, date: b.date, gradient: b.gradient, sortOrder: b.sortOrder })}
             />
+          </TabsContent>
+
+          <TabsContent value="footer">
+            <FooterEditor />
           </TabsContent>
 
           <TabsContent value="messages">

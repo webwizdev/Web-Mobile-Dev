@@ -87,6 +87,26 @@ export const blogPosts = pgTable("blog_posts", {
   sortOrder: integer("sort_order").notNull().default(0),
 });
 
+export const footerContent = pgTable("footer_content", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tagline: text("tagline").notNull(),
+  copyrightText: text("copyright_text").notNull(),
+  locationText: text("location_text").notNull(),
+  twitterUrl: text("twitter_url").notNull(),
+  linkedinUrl: text("linkedin_url").notNull(),
+  instagramUrl: text("instagram_url").notNull(),
+  githubUrl: text("github_url").notNull(),
+  dribbbleUrl: text("dribbble_url").notNull(),
+});
+
+export const footerLinks = pgTable("footer_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  section: text("section").notNull(),
+  label: text("label").notNull(),
+  href: text("href").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -107,6 +127,8 @@ export const insertProjectSchema = createInsertSchema(projects).omit({ id: true 
 export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({ id: true });
 export const insertTestimonialSchema = createInsertSchema(testimonials).omit({ id: true });
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true });
+export const insertFooterContentSchema = createInsertSchema(footerContent).omit({ id: true });
+export const insertFooterLinkSchema = createInsertSchema(footerLinks).omit({ id: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -126,3 +148,7 @@ export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type FooterContent = typeof footerContent.$inferSelect;
+export type InsertFooterContent = z.infer<typeof insertFooterContentSchema>;
+export type FooterLink = typeof footerLinks.$inferSelect;
+export type InsertFooterLink = z.infer<typeof insertFooterLinkSchema>;

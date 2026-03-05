@@ -1,41 +1,55 @@
+import { useQuery } from "@tanstack/react-query";
 import { Linkedin, Twitter, Instagram } from "lucide-react";
 import { SiGithub, SiDribbble } from "react-icons/si";
+import type { FooterContent, FooterLink } from "@shared/schema";
 
-const footerLinks = {
-  services: [
-    { label: "Web Development", href: "#services" },
-    { label: "Mobile Development", href: "#services" },
-    { label: "UI/UX Design", href: "#services" },
-    { label: "Digital Strategy", href: "#services" },
-  ],
-  company: [
-    { label: "About Us", href: "#about" },
-    { label: "Our Team", href: "#about" },
-    { label: "Blog", href: "#blog" },
-    { label: "Careers", href: "#" },
-  ],
-  support: [
-    { label: "Contact", href: "#contact" },
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
-    { label: "FAQ", href: "#" },
-  ],
-};
-
-const socialLinks = [
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: SiGithub, href: "#", label: "GitHub" },
-  { icon: SiDribbble, href: "#", label: "Dribbble" },
-];
+interface FooterData {
+  content: FooterContent;
+  links: FooterLink[];
+}
 
 export function Footer() {
+  const { data } = useQuery<FooterData>({ queryKey: ["/api/footer"] });
+
+  const content = data?.content;
+  const links = data?.links || [];
+
+  const serviceLinks = links.filter((l) => l.section === "services");
+  const companyLinks = links.filter((l) => l.section === "company");
+  const supportLinks = links.filter((l) => l.section === "support");
+
+  const socialLinks = [
+    { icon: Twitter, href: content?.twitterUrl || "#", label: "Twitter" },
+    { icon: Linkedin, href: content?.linkedinUrl || "#", label: "LinkedIn" },
+    { icon: Instagram, href: content?.instagramUrl || "#", label: "Instagram" },
+    { icon: SiGithub, href: content?.githubUrl || "#", label: "GitHub" },
+    { icon: SiDribbble, href: content?.dribbbleUrl || "#", label: "Dribbble" },
+  ];
+
   const scrollToSection = (href: string) => {
     if (href === "#") return;
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
+
+  const renderLinkColumn = (title: string, items: FooterLink[]) => (
+    <div>
+      <h4 className="font-semibold text-foreground mb-4 text-sm">{title}</h4>
+      <ul className="space-y-2.5">
+        {items.map((link) => (
+          <li key={link.id}>
+            <button
+              onClick={() => scrollToSection(link.href)}
+              className="text-sm text-muted-foreground transition-colors"
+              data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
+            >
+              {link.label}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 
   return (
     <footer
@@ -54,14 +68,15 @@ export function Footer() {
               <span className="font-bold text-foreground">Creatives</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-xs">
-              Crafting exceptional digital experiences through innovative design
-              and cutting-edge development.
+              {content?.tagline || "Crafting exceptional digital experiences through innovative design and cutting-edge development."}
             </p>
             <div className="flex gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
+                  target={social.href !== "#" ? "_blank" : undefined}
+                  rel={social.href !== "#" ? "noopener noreferrer" : undefined}
                   className="w-9 h-9 rounded-md bg-muted flex items-center justify-center text-muted-foreground hover-elevate transition-all"
                   data-testid={`link-social-${social.label.toLowerCase()}`}
                 >
@@ -71,62 +86,9 @@ export function Footer() {
             </div>
           </div>
 
-          <div>
-            <h4 className="font-semibold text-foreground mb-4 text-sm">
-              Services
-            </h4>
-            <ul className="space-y-2.5">
-              {footerLinks.services.map((link) => (
-                <li key={link.label}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
-                    className="text-sm text-muted-foreground transition-colors"
-                    data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-foreground mb-4 text-sm">
-              Company
-            </h4>
-            <ul className="space-y-2.5">
-              {footerLinks.company.map((link) => (
-                <li key={link.label}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
-                    className="text-sm text-muted-foreground transition-colors"
-                    data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-foreground mb-4 text-sm">
-              Support
-            </h4>
-            <ul className="space-y-2.5">
-              {footerLinks.support.map((link) => (
-                <li key={link.label}>
-                  <button
-                    onClick={() => scrollToSection(link.href)}
-                    className="text-sm text-muted-foreground transition-colors"
-                    data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {renderLinkColumn("Services", serviceLinks)}
+          {renderLinkColumn("Company", companyLinks)}
+          {renderLinkColumn("Support", supportLinks)}
         </div>
 
         <div className="border-t border-border mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -134,10 +96,10 @@ export function Footer() {
             className="text-sm text-muted-foreground"
             data-testid="text-copyright"
           >
-            2026 FIO Creatives. All rights reserved.
+            {content?.copyrightText || "2026 FIO Creatives. All rights reserved."}
           </p>
           <p className="text-sm text-muted-foreground">
-            Made with passion in San Francisco
+            {content?.locationText || "Made with passion in San Francisco"}
           </p>
         </div>
       </div>
