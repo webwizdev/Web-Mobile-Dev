@@ -1,0 +1,123 @@
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Clock } from "lucide-react";
+
+const blogPosts = [
+  {
+    id: 1,
+    title: "The Future of Progressive Web Apps in 2025",
+    excerpt:
+      "PWAs are evolving rapidly. Here's how they're changing the way we build for the web and why your next project should consider one.",
+    category: "Engineering",
+    readTime: "5 min read",
+    date: "Feb 20, 2026",
+    gradient: "from-blue-600 to-indigo-600",
+  },
+  {
+    id: 2,
+    title: "Design Systems That Scale: Lessons from 50+ Projects",
+    excerpt:
+      "Building a design system that works across teams and products requires careful planning. We share our approach and key takeaways.",
+    category: "Design",
+    readTime: "8 min read",
+    date: "Feb 12, 2026",
+    gradient: "from-rose-500 to-pink-600",
+  },
+  {
+    id: 3,
+    title: "Why We Switched to React Native for Cross-Platform",
+    excerpt:
+      "After years of native development, our shift to React Native transformed our mobile workflow. Here's the full story.",
+    category: "Mobile",
+    readTime: "6 min read",
+    date: "Jan 28, 2026",
+    gradient: "from-emerald-500 to-teal-600",
+  },
+];
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+export function BlogSection() {
+  return (
+    <section id="blog" className="py-24 lg:py-32" data-testid="section-blog">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="text-sm font-semibold text-primary tracking-wide uppercase">
+            Blog & Insights
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 mb-4">
+            Latest from Our Blog
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+            Thoughts, case studies, and insights from our team on design,
+            development, and digital strategy.
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="grid md:grid-cols-3 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+        >
+          {blogPosts.map((post) => (
+            <motion.div key={post.id} variants={itemVariants}>
+              <Card
+                className="group cursor-pointer border-border/50 hover-elevate transition-all duration-300 h-full flex flex-col"
+                data-testid={`card-blog-${post.id}`}
+              >
+                <div
+                  className={`h-40 rounded-t-md bg-gradient-to-br ${post.gradient} relative`}
+                >
+                  <div className="absolute bottom-3 left-3">
+                    <Badge
+                      variant="secondary"
+                      className="bg-white/20 text-white backdrop-blur-sm border-white/10"
+                    >
+                      {post.category}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                    <span>{post.date}</span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {post.readTime}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2 leading-tight">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed flex-1">
+                    {post.excerpt}
+                  </p>
+                  <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
+                    Read More
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
