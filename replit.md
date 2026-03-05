@@ -6,10 +6,11 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 ## Architecture
 - **Frontend**: React SPA with Vite, Tailwind CSS, Shadcn UI, Framer Motion
 - **Backend**: Express.js API server with session-based admin auth
+- **Database**: PostgreSQL via Drizzle ORM (Neon serverless driver)
 - **Routing**: wouter for frontend, Express for API routes
 - **Styling**: Tailwind CSS with CSS variables for theming, Plus Jakarta Sans font
 - **Animations**: Framer Motion for scroll-triggered animations
-- **Storage**: In-memory (MemStorage) with seed data
+- **Storage**: PostgreSQL (DatabaseStorage) with automatic seed data on first run
 
 ## Key Sections (Public Site)
 1. **Navigation** - Sticky nav with logo, links, dark mode toggle, mobile hamburger
@@ -23,7 +24,7 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 9. **Footer** - Links, social icons, copyright
 
 ## Admin Panel (/admin)
-- **Login**: admin / fio2026
+- **Login**: admin / fio2026 (configurable via ADMIN_USERNAME / ADMIN_PASSWORD env vars)
 - **Sections**: Hero, Stats, Services, Portfolio, Team, Testimonials, Blog, Messages
 - **Features**: Full CRUD (create, read, update, delete) for all content types
 - **UI**: Tabbed interface with dialog-based editing forms
@@ -52,8 +53,17 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 - `POST/PATCH/DELETE /api/blog/:id` - CRUD blog posts
 - `GET/DELETE /api/messages/:id` - View/delete contact messages
 
+## Database
+- PostgreSQL with Drizzle ORM
+- Tables: users, hero_content, stats, services, projects, team_members, testimonials, blog_posts, contact_messages
+- Schema defined in `shared/schema.ts` using `pgTable`
+- Connection via `server/db.ts` using Neon serverless driver
+- Auto-seeds on first run if hero_content table is empty (`server/seed.ts`)
+- Push schema changes with `npm run db:push`
+
 ## Data Types (shared/schema.ts)
 - HeroContent, Stat, Service, Project, TeamMember, Testimonial, BlogPost, ContactMessage
+- Insert schemas created with `createInsertSchema` from `drizzle-zod`
 
 ## File Structure
 - `client/src/pages/home.tsx` - Main landing page
@@ -67,9 +77,12 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 - `client/src/components/blog-section.tsx` - Blog posts (API-driven)
 - `client/src/components/contact-section.tsx` - Contact form
 - `client/src/components/footer.tsx` - Footer
+- `server/index.ts` - Express app setup, seeds database on startup
+- `server/db.ts` - Database connection (Drizzle + Neon)
+- `server/seed.ts` - Database seeding logic (runs once if empty)
 - `server/routes.ts` - All API endpoints + admin auth middleware
-- `server/storage.ts` - In-memory storage with CRUD + seed data
-- `shared/schema.ts` - Zod schemas and TypeScript types
+- `server/storage.ts` - DatabaseStorage class with all CRUD operations
+- `shared/schema.ts` - Drizzle table definitions, Zod schemas, TypeScript types
 
 ## Running
 - `npm run dev` starts both frontend (Vite) and backend (Express) on the same port

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -19,6 +19,74 @@ export const contactMessages = pgTable("contact_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const heroContent = pgTable("hero_content", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  badgeText: text("badge_text").notNull(),
+  titleLine1: text("title_line_1").notNull(),
+  titleHighlight: text("title_highlight").notNull(),
+  titleLine3: text("title_line_3").notNull(),
+  subtitle: text("subtitle").notNull(),
+  ctaPrimary: text("cta_primary").notNull(),
+  ctaSecondary: text("cta_secondary").notNull(),
+});
+
+export const stats = pgTable("stats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  value: text("value").notNull(),
+  label: text("label").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const services = pgTable("services", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  icon: text("icon").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  features: text("features").array().notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const projects = pgTable("projects", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  category: text("category").notNull(),
+  description: text("description").notNull(),
+  tags: text("tags").array().notNull(),
+  gradient: text("gradient").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const teamMembers = pgTable("team_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  initials: text("initials").notNull(),
+  color: text("color").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const testimonials = pgTable("testimonials", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  quote: text("quote").notNull(),
+  name: text("name").notNull(),
+  role: text("role").notNull(),
+  company: text("company").notNull(),
+  initials: text("initials").notNull(),
+  color: text("color").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  excerpt: text("excerpt").notNull(),
+  category: text("category").notNull(),
+  readTime: text("read_time").notNull(),
+  date: text("date").notNull(),
+  gradient: text("gradient").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -32,96 +100,29 @@ export const insertContactMessageSchema = createInsertSchema(contactMessages).pi
   message: true,
 });
 
+export const insertHeroContentSchema = createInsertSchema(heroContent).omit({ id: true });
+export const insertStatSchema = createInsertSchema(stats).omit({ id: true });
+export const insertServiceSchema = createInsertSchema(services).omit({ id: true });
+export const insertProjectSchema = createInsertSchema(projects).omit({ id: true });
+export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({ id: true });
+export const insertTestimonialSchema = createInsertSchema(testimonials).omit({ id: true });
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true });
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertContactMessage = z.infer<typeof insertContactMessageSchema>;
 export type ContactMessage = typeof contactMessages.$inferSelect;
-
-export const heroContentSchema = z.object({
-  id: z.string(),
-  badgeText: z.string(),
-  titleLine1: z.string(),
-  titleHighlight: z.string(),
-  titleLine3: z.string(),
-  subtitle: z.string(),
-  ctaPrimary: z.string(),
-  ctaSecondary: z.string(),
-});
-export const insertHeroContentSchema = heroContentSchema.omit({ id: true });
-export type HeroContent = z.infer<typeof heroContentSchema>;
+export type HeroContent = typeof heroContent.$inferSelect;
 export type InsertHeroContent = z.infer<typeof insertHeroContentSchema>;
-
-export const statSchema = z.object({
-  id: z.string(),
-  value: z.string(),
-  label: z.string(),
-  sortOrder: z.number(),
-});
-export const insertStatSchema = statSchema.omit({ id: true });
-export type Stat = z.infer<typeof statSchema>;
+export type Stat = typeof stats.$inferSelect;
 export type InsertStat = z.infer<typeof insertStatSchema>;
-
-export const serviceSchema = z.object({
-  id: z.string(),
-  icon: z.string(),
-  title: z.string(),
-  description: z.string(),
-  features: z.array(z.string()),
-  sortOrder: z.number(),
-});
-export const insertServiceSchema = serviceSchema.omit({ id: true });
-export type Service = z.infer<typeof serviceSchema>;
+export type Service = typeof services.$inferSelect;
 export type InsertService = z.infer<typeof insertServiceSchema>;
-
-export const projectSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  category: z.string(),
-  description: z.string(),
-  tags: z.array(z.string()),
-  gradient: z.string(),
-  sortOrder: z.number(),
-});
-export const insertProjectSchema = projectSchema.omit({ id: true });
-export type Project = z.infer<typeof projectSchema>;
+export type Project = typeof projects.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
-
-export const teamMemberSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  role: z.string(),
-  initials: z.string(),
-  color: z.string(),
-  sortOrder: z.number(),
-});
-export const insertTeamMemberSchema = teamMemberSchema.omit({ id: true });
-export type TeamMember = z.infer<typeof teamMemberSchema>;
+export type TeamMember = typeof teamMembers.$inferSelect;
 export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
-
-export const testimonialSchema = z.object({
-  id: z.string(),
-  quote: z.string(),
-  name: z.string(),
-  role: z.string(),
-  company: z.string(),
-  initials: z.string(),
-  color: z.string(),
-  sortOrder: z.number(),
-});
-export const insertTestimonialSchema = testimonialSchema.omit({ id: true });
-export type Testimonial = z.infer<typeof testimonialSchema>;
+export type Testimonial = typeof testimonials.$inferSelect;
 export type InsertTestimonial = z.infer<typeof insertTestimonialSchema>;
-
-export const blogPostSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  excerpt: z.string(),
-  category: z.string(),
-  readTime: z.string(),
-  date: z.string(),
-  gradient: z.string(),
-  sortOrder: z.number(),
-});
-export const insertBlogPostSchema = blogPostSchema.omit({ id: true });
-export type BlogPost = z.infer<typeof blogPostSchema>;
+export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
