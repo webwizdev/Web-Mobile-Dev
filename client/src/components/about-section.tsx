@@ -9,21 +9,21 @@ import type { TeamMember } from "@shared/schema";
 
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.12 } },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
 export function AboutSection() {
   const { data: team, isLoading } = useQuery<TeamMember[]>({ queryKey: ["/api/team"] });
 
   return (
-    <section id="about" className="py-20 md:py-24 lg:py-32" data-testid="section-about">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center mb-16 lg:mb-20">
+    <section id="about" className="py-24 lg:py-32" data-testid="section-about">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -71,24 +71,17 @@ export function AboutSection() {
               { value: "24/7", label: "Support Available", desc: "For all active projects" },
               { value: "40+", label: "Technologies", desc: "In our tech stack" },
             ].map((item) => (
-              <div
+              <Card
                 key={item.label}
-                className="relative flex overflow-hidden rounded-md"
+                className="p-5 border-border/50 text-center"
                 data-testid={`card-stat-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <div className="w-1 shrink-0 bg-gradient-to-b from-primary via-chart-2 to-primary rounded-l-md" />
-                <Card className="flex-1 p-5 text-center rounded-l-none border-l-0">
-                  <div className="text-2xl font-bold text-primary mb-1">{item.value}</div>
-                  <div className="text-sm font-semibold text-foreground">{item.label}</div>
-                  <div className="text-xs text-muted-foreground mt-1">{item.desc}</div>
-                </Card>
-              </div>
+                <div className="text-2xl font-bold text-primary mb-1">{item.value}</div>
+                <div className="text-sm font-semibold text-foreground">{item.label}</div>
+                <div className="text-xs text-muted-foreground mt-1">{item.desc}</div>
+              </Card>
             ))}
           </motion.div>
-        </div>
-
-        <div className="relative mb-12 lg:mb-16">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         </div>
 
         <div>
@@ -108,7 +101,7 @@ export function AboutSection() {
           </motion.div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} className="p-6 text-center border-border/50">
                   <Skeleton className="w-20 h-20 rounded-full mx-auto mb-4" />
@@ -119,7 +112,7 @@ export function AboutSection() {
             </div>
           ) : (
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+              className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
@@ -131,28 +124,23 @@ export function AboutSection() {
                     className="p-6 text-center border-border/50 hover-elevate transition-all duration-300 group"
                     data-testid={`card-team-${member.id}`}
                   >
-                    <div className="relative mx-auto mb-4 w-20 h-20">
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary via-chart-2 to-primary p-[2px]">
-                        <div className="w-full h-full rounded-full bg-card" />
-                      </div>
-                      <Avatar className="w-20 h-20 absolute inset-0">
-                        <AvatarFallback
-                          className={`bg-gradient-to-br ${member.color} text-white text-lg font-bold`}
-                        >
-                          {member.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                    </div>
+                    <Avatar className="w-20 h-20 mx-auto mb-4">
+                      <AvatarFallback
+                        className={`bg-gradient-to-br ${member.color} text-white text-lg font-bold`}
+                      >
+                        {member.initials}
+                      </AvatarFallback>
+                    </Avatar>
                     <h4 className="font-semibold text-foreground text-lg">{member.name}</h4>
                     <p className="text-sm text-muted-foreground mt-1 mb-4">{member.role}</p>
-                    <div className="flex justify-center gap-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                      <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                    <div className="flex justify-center gap-3">
+                      <a href="#" className="text-muted-foreground transition-colors">
                         <Linkedin className="w-4 h-4" />
                       </a>
-                      <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                      <a href="#" className="text-muted-foreground transition-colors">
                         <Twitter className="w-4 h-4" />
                       </a>
-                      <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                      <a href="#" className="text-muted-foreground transition-colors">
                         <SiGithub className="w-4 h-4" />
                       </a>
                     </div>

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ExternalLink, ArrowUpRight } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Project } from "@shared/schema";
 
@@ -28,7 +28,7 @@ export function PortfolioSection() {
   return (
     <section
       id="portfolio"
-      className="py-16 sm:py-24 lg:py-32 bg-muted/30"
+      className="py-24 lg:py-32 bg-muted/30"
       data-testid="section-portfolio"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -45,9 +45,6 @@ export function PortfolioSection() {
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 mb-4">
             Featured Projects
           </h2>
-          <div className="flex justify-center mt-2 mb-4">
-            <div className="h-1 w-16 rounded-full bg-gradient-to-r from-primary to-chart-2" />
-          </div>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             A selection of our recent work across web, mobile, and design disciplines.
           </p>
@@ -58,9 +55,9 @@ export function PortfolioSection() {
             <button
               key={filter.value}
               onClick={() => setActiveFilter(filter.value)}
-              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+              className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
                 activeFilter === filter.value
-                  ? "bg-gradient-to-r from-primary to-chart-2 text-white shadow-md"
+                  ? "bg-primary text-primary-foreground"
                   : "bg-muted text-muted-foreground hover-elevate"
               }`}
               data-testid={`button-filter-${filter.value}`}
@@ -71,10 +68,10 @@ export function PortfolioSection() {
         </div>
 
         {isLoading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="border-border/50">
-                <Skeleton className="h-48 sm:h-52 rounded-t-md" />
+                <Skeleton className="h-48 rounded-t-md" />
                 <div className="p-5 space-y-3">
                   <Skeleton className="h-5 w-40" />
                   <Skeleton className="h-4 w-full" />
@@ -87,7 +84,7 @@ export function PortfolioSection() {
             ))}
           </div>
         ) : (
-          <motion.div layout className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <motion.div layout className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence mode="popLayout">
               {filtered.map((project) => (
                 <motion.div
@@ -99,22 +96,21 @@ export function PortfolioSection() {
                   transition={{ duration: 0.3 }}
                 >
                   <Card
-                    className="group cursor-pointer border-border/50 transition-all duration-300 hover:shadow-xl hover:scale-[1.03]"
+                    className="group cursor-pointer border-border/50 hover-elevate transition-all duration-300"
                     data-testid={`card-project-${project.id}`}
                   >
                     <div
-                      className={`h-52 sm:h-48 rounded-t-md bg-gradient-to-br ${project.gradient} relative overflow-hidden`}
+                      className={`h-48 rounded-t-md bg-gradient-to-br ${project.gradient} relative`}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-t-md flex items-center justify-center">
-                        <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 flex flex-col items-center gap-2">
-                          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center">
-                            <ArrowUpRight className="w-5 h-5 text-white" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-t-md flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                            <ExternalLink className="w-5 h-5 text-white" />
                           </div>
-                          <span className="text-white text-sm font-semibold tracking-wide">View Project</span>
                         </div>
                       </div>
                       <div className="absolute bottom-4 left-4">
-                        <Badge variant="secondary" className="bg-white/15 text-white backdrop-blur-md border-white/20 rounded-full">
+                        <Badge variant="secondary" className="bg-white/20 text-white backdrop-blur-sm border-white/10">
                           {project.category === "web"
                             ? "Web App"
                             : project.category === "mobile"
@@ -134,7 +130,7 @@ export function PortfolioSection() {
                         {project.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
+                            className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium"
                           >
                             {tag}
                           </span>
