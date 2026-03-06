@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -14,8 +13,8 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertContactMessageSchema } from "@shared/schema";
-import type { InsertContactMessage } from "@shared/schema";
-import { useMutation } from "@tanstack/react-query";
+import type { InsertContactMessage, ContactInfo } from "@shared/schema";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin, Phone, Send, Loader2 } from "lucide-react";
@@ -28,29 +27,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-const contactInfo = [
-  {
-    icon: Mail,
-    label: "Email Us",
-    value: "hello@fiocreatives.com",
-    href: "mailto:hello@fiocreatives.com",
-  },
-  {
-    icon: Phone,
-    label: "Call Us",
-    value: "+1 (555) 123-4567",
-    href: "tel:+15551234567",
-  },
-  {
-    icon: MapPin,
-    label: "Visit Us",
-    value: "123 Innovation Drive, San Francisco, CA",
-    href: "#",
-  },
-];
-
 export function ContactSection() {
   const { toast } = useToast();
+  const { data: info } = useQuery<ContactInfo>({ queryKey: ["/api/contact-info"] });
 
   const form = useForm<InsertContactMessage>({
     resolver: zodResolver(
@@ -93,6 +72,27 @@ export function ContactSection() {
     mutation.mutate(data);
   };
 
+  const contactDetails = [
+    {
+      icon: Mail,
+      label: "Email Us",
+      value: info?.email || "info@fiocreatives.com",
+      href: `mailto:${info?.email || "info@fiocreatives.com"}`,
+    },
+    {
+      icon: Phone,
+      label: "Call Us",
+      value: info?.phone || "+1 (555) 123-4567",
+      href: `tel:${(info?.phone || "+1 (555) 123-4567").replace(/[^+\d]/g, "")}`,
+    },
+    {
+      icon: MapPin,
+      label: "Visit Us",
+      value: info?.address || "123 Innovation Drive, San Francisco, CA",
+      href: "#",
+    },
+  ];
+
   return (
     <section
       id="contact"
@@ -108,14 +108,13 @@ export function ContactSection() {
           transition={{ duration: 0.5 }}
         >
           <span className="text-sm font-semibold text-primary tracking-wide uppercase">
-            Get in Touch
+            {info?.sectionLabel || "Get in Touch"}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 mb-4">
-            Let's Build Something Great
+            {info?.sectionTitle || "Let's Build Something Great"}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Ready to start your next project? Drop us a message and we'll get
-            back to you within 24 hours.
+            {info?.sectionSubtitle || "Ready to start your next project? Drop us a message and we'll get back to you within 24 hours."}
           </p>
         </motion.div>
 
@@ -270,24 +269,24 @@ export function ContactSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            {contactInfo.map((info) => (
+            {contactDetails.map((detail) => (
               <a
-                key={info.label}
-                href={info.href}
+                key={detail.label}
+                href={detail.href}
                 className="block"
-                data-testid={`link-contact-${info.label.toLowerCase().replace(/\s+/g, "-")}`}
+                data-testid={`link-contact-${detail.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
                 <Card className="p-5 border-border/50 hover-elevate transition-all duration-300">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <info.icon className="w-5 h-5 text-primary" />
+                      <detail.icon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
                       <div className="text-sm font-medium text-muted-foreground mb-1">
-                        {info.label}
+                        {detail.label}
                       </div>
                       <div className="font-medium text-foreground">
-                        {info.value}
+                        {detail.value}
                       </div>
                     </div>
                   </div>
@@ -297,16 +296,22 @@ export function ContactSection() {
 
             <Card className="p-6 border-border/50 bg-gradient-to-br from-primary/5 to-chart-3/5">
               <h4 className="font-semibold text-foreground mb-2">
-                Prefer a quick chat?
+                {info?.ctaTitle || "Prefer a quick chat?"}
               </h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Book a free 30-minute consultation call to discuss your project
-                requirements and explore how we can help bring your vision to
-                life.
+                {info?.ctaDescription || "Book a free 30-minute consultation call to discuss your project requirements and explore how we can help bring your vision to life."}
               </p>
-              <Button variant="outline" className="mt-4" data-testid="button-book-call">
-                Book a Call
-              </Button>
+              {info?.ctaButtonUrl && info.ctaButtonUrl !== "#" ? (
+                <a href={info.ctaButtonUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="mt-4" data-testid="button-book-call">
+                    {info?.ctaButtonText || "Book a Call"}
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="outline" className="mt-4" data-testid="button-book-call">
+                  {info?.ctaButtonText || "Book a Call"}
+                </Button>
+              )}
             </Card>
           </motion.div>
         </div>

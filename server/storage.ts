@@ -10,8 +10,10 @@ import {
   type BlogPost, type InsertBlogPost,
   type FooterContent, type InsertFooterContent,
   type FooterLink, type InsertFooterLink,
+  type ContactInfo, type InsertContactInfo,
   users, contactMessages, heroContent, stats, services, projects,
   teamMembers, testimonials, blogPosts, footerContent, footerLinks,
+  contactInfo,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc } from "drizzle-orm";
@@ -65,6 +67,9 @@ export interface IStorage {
   createFooterLink(data: InsertFooterLink): Promise<FooterLink>;
   updateFooterLink(id: string, data: Partial<InsertFooterLink>): Promise<FooterLink | undefined>;
   deleteFooterLink(id: string): Promise<boolean>;
+
+  getContactInfo(): Promise<ContactInfo>;
+  updateContactInfo(data: InsertContactInfo): Promise<ContactInfo>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -275,6 +280,32 @@ export class DatabaseStorage implements IStorage {
   async deleteFooterLink(id: string): Promise<boolean> {
     const result = await db.delete(footerLinks).where(eq(footerLinks.id, id)).returning();
     return result.length > 0;
+  }
+
+  async getContactInfo(): Promise<ContactInfo> {
+    const [info] = await db.select().from(contactInfo);
+    if (!info) {
+      const [created] = await db.insert(contactInfo).values({
+        sectionLabel: "Get in Touch",
+        sectionTitle: "Let's Build Something Great",
+        sectionSubtitle: "Ready to start your next project? Drop us a message and we'll get back to you within 24 hours.",
+        email: "info@fiocreatives.com",
+        phone: "+1 (555) 123-4567",
+        address: "123 Innovation Drive, San Francisco, CA",
+        ctaTitle: "Prefer a quick chat?",
+        ctaDescription: "Book a free 30-minute consultation call to discuss your project requirements and explore how we can help bring your vision to life.",
+        ctaButtonText: "Book a Call",
+        ctaButtonUrl: "#",
+      }).returning();
+      return created;
+    }
+    return info;
+  }
+
+  async updateContactInfo(data: InsertContactInfo): Promise<ContactInfo> {
+    const existing = await this.getContactInfo();
+    const [updated] = await db.update(contactInfo).set(data).where(eq(contactInfo.id, existing.id)).returning();
+    return updated;
   }
 }
 

@@ -56,6 +56,7 @@ import type {
   ContactMessage,
   FooterContent,
   FooterLink,
+  ContactInfo,
 } from "@shared/schema";
 
 const GRADIENT_OPTIONS = [
@@ -471,6 +472,77 @@ function MessagesViewer() {
   );
 }
 
+function ContactInfoEditor() {
+  const { data: info, isLoading } = useQuery<ContactInfo>({ queryKey: ["/api/contact-info"] });
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState<Partial<ContactInfo>>({});
+  const { toast } = useToast();
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: Partial<ContactInfo>) => {
+      await apiRequest("PUT", "/api/contact-info", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/contact-info"] });
+      setEditing(false);
+      toast({ title: "Contact info updated" });
+    },
+  });
+
+  if (isLoading || !info) return <div className="p-4 text-muted-foreground">Loading...</div>;
+
+  const startEdit = () => { setForm(info); setEditing(true); };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h3 className="text-lg font-semibold text-foreground">Contact Section</h3>
+        <Button onClick={startEdit} data-testid="button-edit-contact-info"><Pencil className="w-4 h-4 mr-2" />Edit Contact Info</Button>
+      </div>
+      <Card className="p-6 border-border/50 space-y-3">
+        <div><span className="text-sm text-muted-foreground">Label: </span><span className="text-foreground">{info.sectionLabel}</span></div>
+        <div><span className="text-sm text-muted-foreground">Title: </span><span className="text-foreground">{info.sectionTitle}</span></div>
+        <div><span className="text-sm text-muted-foreground">Subtitle: </span><span className="text-foreground text-sm">{info.sectionSubtitle}</span></div>
+        <div className="border-t border-border pt-3 mt-3 space-y-2">
+          <div><span className="text-sm text-muted-foreground">Email: </span><span className="text-foreground">{info.email}</span></div>
+          <div><span className="text-sm text-muted-foreground">Phone: </span><span className="text-foreground">{info.phone}</span></div>
+          <div><span className="text-sm text-muted-foreground">Address: </span><span className="text-foreground">{info.address}</span></div>
+        </div>
+        <div className="border-t border-border pt-3 mt-3 space-y-2">
+          <div><span className="text-sm text-muted-foreground">CTA Title: </span><span className="text-foreground">{info.ctaTitle}</span></div>
+          <div><span className="text-sm text-muted-foreground">CTA Button: </span><span className="text-foreground">{info.ctaButtonText}</span></div>
+          <div><span className="text-sm text-muted-foreground">CTA URL: </span><span className="text-foreground text-xs">{info.ctaButtonUrl}</span></div>
+        </div>
+      </Card>
+      <Dialog open={editing} onOpenChange={setEditing}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Edit Contact Section</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2"><Label>Section Label</Label><Input value={form.sectionLabel || ""} onChange={(e) => setForm({ ...form, sectionLabel: e.target.value })} data-testid="input-contact-label" /></div>
+            <div className="space-y-2"><Label>Section Title</Label><Input value={form.sectionTitle || ""} onChange={(e) => setForm({ ...form, sectionTitle: e.target.value })} data-testid="input-contact-title" /></div>
+            <div className="space-y-2"><Label>Section Subtitle</Label><Textarea value={form.sectionSubtitle || ""} onChange={(e) => setForm({ ...form, sectionSubtitle: e.target.value })} className="min-h-[60px] resize-none" data-testid="input-contact-subtitle" /></div>
+            <div className="space-y-2"><Label>Email Address</Label><Input value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} data-testid="input-contact-email" /></div>
+            <div className="space-y-2"><Label>Phone Number</Label><Input value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} data-testid="input-contact-phone" /></div>
+            <div className="space-y-2"><Label>Address</Label><Input value={form.address || ""} onChange={(e) => setForm({ ...form, address: e.target.value })} data-testid="input-contact-address" /></div>
+            <div className="space-y-2"><Label>CTA Title</Label><Input value={form.ctaTitle || ""} onChange={(e) => setForm({ ...form, ctaTitle: e.target.value })} data-testid="input-contact-cta-title" /></div>
+            <div className="space-y-2"><Label>CTA Description</Label><Textarea value={form.ctaDescription || ""} onChange={(e) => setForm({ ...form, ctaDescription: e.target.value })} className="min-h-[60px] resize-none" data-testid="input-contact-cta-desc" /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>CTA Button Text</Label><Input value={form.ctaButtonText || ""} onChange={(e) => setForm({ ...form, ctaButtonText: e.target.value })} data-testid="input-contact-cta-btn" /></div>
+              <div className="space-y-2"><Label>CTA Button URL</Label><Input value={form.ctaButtonUrl || ""} onChange={(e) => setForm({ ...form, ctaButtonUrl: e.target.value })} data-testid="input-contact-cta-url" /></div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+            <Button onClick={() => updateMutation.mutate(form)} disabled={updateMutation.isPending} data-testid="button-save-contact-info">
+              {updateMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 function FooterEditor() {
   const { data: footerData, isLoading: loadingContent } = useQuery<{ content: FooterContent; links: FooterLink[] }>({ queryKey: ["/api/footer"] });
   const { data: footerLinksData = [], isLoading: loadingLinks } = useQuery<FooterLink[]>({ queryKey: ["/api/footer-links"] });
@@ -709,6 +781,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <TabsTrigger value="team" data-testid="tab-team">Team</TabsTrigger>
             <TabsTrigger value="testimonials" data-testid="tab-testimonials">Testimonials</TabsTrigger>
             <TabsTrigger value="blog" data-testid="tab-blog">Blog</TabsTrigger>
+            <TabsTrigger value="contact" data-testid="tab-contact">Contact</TabsTrigger>
             <TabsTrigger value="footer" data-testid="tab-footer">Footer</TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-messages">
               <Mail className="w-4 h-4 mr-1" />Messages
@@ -778,6 +851,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               getDefaults={(count) => ({ title: "", excerpt: "", category: "", readTime: "", date: "", gradient: "from-blue-600 to-indigo-600", sortOrder: count })}
               getFormValues={(b) => ({ title: b.title, excerpt: b.excerpt, category: b.category, readTime: b.readTime, date: b.date, gradient: b.gradient, sortOrder: b.sortOrder })}
             />
+          </TabsContent>
+
+          <TabsContent value="contact">
+            <ContactInfoEditor />
           </TabsContent>
 
           <TabsContent value="footer">

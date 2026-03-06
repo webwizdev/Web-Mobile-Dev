@@ -2,7 +2,7 @@ import { db } from "./db";
 import {
   heroContent, stats, services, projects,
   teamMembers, testimonials, blogPosts,
-  footerContent, footerLinks,
+  footerContent, footerLinks, contactInfo,
 } from "@shared/schema";
 
 export async function seedDatabase() {
@@ -68,6 +68,19 @@ export async function seedDatabase() {
     { title: "Design Systems That Scale: Lessons from 50+ Projects", excerpt: "Building a design system that works across teams and products requires careful planning. We share our approach and key takeaways.", category: "Design", readTime: "8 min read", date: "Feb 12, 2026", gradient: "from-rose-500 to-pink-600", sortOrder: 1 },
     { title: "Why We Switched to React Native for Cross-Platform", excerpt: "After years of native development, our shift to React Native transformed our mobile workflow. Here's the full story.", category: "Mobile", readTime: "6 min read", date: "Jan 28, 2026", gradient: "from-emerald-500 to-teal-600", sortOrder: 2 },
   ]);
+
+  await db.insert(contactInfo).values({
+    sectionLabel: "Get in Touch",
+    sectionTitle: "Let's Build Something Great",
+    sectionSubtitle: "Ready to start your next project? Drop us a message and we'll get back to you within 24 hours.",
+    email: "info@fiocreatives.com",
+    phone: "+1 (555) 123-4567",
+    address: "123 Innovation Drive, San Francisco, CA",
+    ctaTitle: "Prefer a quick chat?",
+    ctaDescription: "Book a free 30-minute consultation call to discuss your project requirements and explore how we can help bring your vision to life.",
+    ctaButtonText: "Book a Call",
+    ctaButtonUrl: "#",
+  });
 
   await db.insert(footerContent).values({
     tagline: "Crafting exceptional digital experiences through innovative design and cutting-edge development.",

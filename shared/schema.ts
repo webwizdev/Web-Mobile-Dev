@@ -107,6 +107,20 @@ export const footerLinks = pgTable("footer_links", {
   sortOrder: integer("sort_order").notNull().default(0),
 });
 
+export const contactInfo = pgTable("contact_info", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sectionLabel: text("section_label").notNull(),
+  sectionTitle: text("section_title").notNull(),
+  sectionSubtitle: text("section_subtitle").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  address: text("address").notNull(),
+  ctaTitle: text("cta_title").notNull(),
+  ctaDescription: text("cta_description").notNull(),
+  ctaButtonText: text("cta_button_text").notNull(),
+  ctaButtonUrl: text("cta_button_url").notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -129,6 +143,7 @@ export const insertTestimonialSchema = createInsertSchema(testimonials).omit({ i
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true });
 export const insertFooterContentSchema = createInsertSchema(footerContent).omit({ id: true });
 export const insertFooterLinkSchema = createInsertSchema(footerLinks).omit({ id: true });
+export const insertContactInfoSchema = createInsertSchema(contactInfo).omit({ id: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -152,3 +167,5 @@ export type FooterContent = typeof footerContent.$inferSelect;
 export type InsertFooterContent = z.infer<typeof insertFooterContentSchema>;
 export type FooterLink = typeof footerLinks.$inferSelect;
 export type InsertFooterLink = z.infer<typeof insertFooterLinkSchema>;
+export type ContactInfo = typeof contactInfo.$inferSelect;
+export type InsertContactInfo = z.infer<typeof insertContactInfoSchema>;

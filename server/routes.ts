@@ -14,6 +14,7 @@ import {
   insertBlogPostSchema,
   insertFooterContentSchema,
   insertFooterLinkSchema,
+  insertContactInfoSchema,
 } from "@shared/schema";
 import { ZodError } from "zod";
 
@@ -290,6 +291,20 @@ export async function registerRoutes(
     const deleted = await storage.deleteBlogPost(req.params.id);
     if (!deleted) return res.status(404).json({ message: "Not found" });
     res.json({ success: true });
+  });
+
+  app.get("/api/contact-info", async (_req, res) => {
+    res.json(await storage.getContactInfo());
+  });
+
+  app.put("/api/contact-info", requireAdmin, async (req, res) => {
+    try {
+      const parsed = insertContactInfoSchema.parse(req.body);
+      res.json(await storage.updateContactInfo(parsed));
+    } catch (error) {
+      if (error instanceof ZodError) res.status(400).json({ message: "Invalid data" });
+      else res.status(500).json({ message: "Failed to update" });
+    }
   });
 
   app.get("/api/footer", async (_req, res) => {
