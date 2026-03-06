@@ -14,10 +14,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertContactMessageSchema } from "@shared/schema";
 import type { InsertContactMessage, ContactInfo } from "@shared/schema";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, MapPin, Phone, Send, Loader2 } from "lucide-react";
+import { Mail, MapPin, Phone, Send } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -48,28 +47,19 @@ export function ContactSection() {
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data: InsertContactMessage) => {
-      await apiRequest("POST", "/api/contact", data);
-    },
-    onSuccess: () => {
-      toast({
-        title: "Message sent!",
-        description: "We'll get back to you within 24 hours.",
-      });
-      form.reset();
-    },
-    onError: () => {
-      toast({
-        title: "Something went wrong",
-        description: "Please try again or email us directly.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const onSubmit = (data: InsertContactMessage) => {
-    mutation.mutate(data);
+    const toEmail = info?.email || "info@fiocreatives.com";
+    const subject = encodeURIComponent(
+      `New Project Inquiry from ${data.name}${data.company ? ` (${data.company})` : ""}`
+    );
+    const body = encodeURIComponent(
+      `Name: ${data.name}\nEmail: ${data.email}${data.company ? `\nCompany: ${data.company}` : ""}${data.service ? `\nService: ${data.service}` : ""}\n\nMessage:\n${data.message}`
+    );
+    window.location.href = `mailto:${toEmail}?subject=${subject}&body=${body}`;
+    toast({
+      title: "Opening email client...",
+      description: "Your email app should open with the message ready to send.",
+    });
   };
 
   const contactDetails = [
@@ -242,20 +232,10 @@ export function ContactSection() {
                     type="submit"
                     size="lg"
                     className="w-full sm:w-auto"
-                    disabled={mutation.isPending}
                     data-testid="button-submit-contact"
                   >
-                    {mutation.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Send Message
-                      </>
-                    )}
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Message
                   </Button>
                 </form>
               </Form>
