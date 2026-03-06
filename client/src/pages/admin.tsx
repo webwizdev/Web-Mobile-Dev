@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 import {
   LogOut,
   Plus,
@@ -44,6 +45,8 @@ import {
   Lock,
   User,
   ArrowLeft,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import type {
   HeroContent,
@@ -57,6 +60,7 @@ import type {
   FooterContent,
   FooterLink,
   ContactInfo,
+  SectionVisibility,
 } from "@shared/schema";
 
 const GRADIENT_OPTIONS = [
@@ -472,6 +476,48 @@ function MessagesViewer() {
   );
 }
 
+function SectionVisibilityEditor() {
+  const { data: sections, isLoading } = useQuery<SectionVisibility[]>({ queryKey: ["/api/section-visibility"] });
+  const { toast } = useToast();
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ sectionKey, visible }: { sectionKey: string; visible: boolean }) => {
+      await apiRequest("PUT", `/api/section-visibility/${sectionKey}`, { visible });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/section-visibility"] });
+      toast({ title: "Section visibility updated" });
+    },
+  });
+
+  if (isLoading || !sections) return <div className="p-4 text-muted-foreground">Loading...</div>;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h3 className="text-lg font-semibold text-foreground">Section Visibility</h3>
+        <p className="text-sm text-muted-foreground">Toggle sections on or off to show/hide them on the website.</p>
+      </div>
+      <div className="grid gap-3">
+        {sections.map((section) => (
+          <Card key={section.id} className="p-4 border-border/50 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {section.visible ? <Eye className="w-4 h-4 text-primary" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
+              <span className={`font-medium ${section.visible ? "text-foreground" : "text-muted-foreground"}`}>{section.label}</span>
+            </div>
+            <Switch
+              checked={section.visible}
+              onCheckedChange={(checked) => toggleMutation.mutate({ sectionKey: section.sectionKey, visible: checked })}
+              disabled={toggleMutation.isPending}
+              data-testid={`switch-visibility-${section.sectionKey}`}
+            />
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ContactInfoEditor() {
   const { data: info, isLoading } = useQuery<ContactInfo>({ queryKey: ["/api/contact-info"] });
   const [editing, setEditing] = useState(false);
@@ -783,6 +829,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <TabsTrigger value="blog" data-testid="tab-blog">Blog</TabsTrigger>
             <TabsTrigger value="contact" data-testid="tab-contact">Contact</TabsTrigger>
             <TabsTrigger value="footer" data-testid="tab-footer">Footer</TabsTrigger>
+            <TabsTrigger value="sections" data-testid="tab-sections">
+              <Eye className="w-4 h-4 mr-1" />Sections
+            </TabsTrigger>
             <TabsTrigger value="messages" data-testid="tab-messages">
               <Mail className="w-4 h-4 mr-1" />Messages
             </TabsTrigger>
@@ -859,6 +908,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
           <TabsContent value="footer">
             <FooterEditor />
+          </TabsContent>
+
+          <TabsContent value="sections">
+            <SectionVisibilityEditor />
           </TabsContent>
 
           <TabsContent value="messages">

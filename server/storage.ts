@@ -11,9 +11,10 @@ import {
   type FooterContent, type InsertFooterContent,
   type FooterLink, type InsertFooterLink,
   type ContactInfo, type InsertContactInfo,
+  type SectionVisibility,
   users, contactMessages, heroContent, stats, services, projects,
   teamMembers, testimonials, blogPosts, footerContent, footerLinks,
-  contactInfo,
+  contactInfo, sectionVisibility,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, asc, desc } from "drizzle-orm";
@@ -70,6 +71,9 @@ export interface IStorage {
 
   getContactInfo(): Promise<ContactInfo>;
   updateContactInfo(data: InsertContactInfo): Promise<ContactInfo>;
+
+  getSectionVisibility(): Promise<SectionVisibility[]>;
+  updateSectionVisibility(sectionKey: string, visible: boolean): Promise<SectionVisibility | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -305,6 +309,29 @@ export class DatabaseStorage implements IStorage {
   async updateContactInfo(data: InsertContactInfo): Promise<ContactInfo> {
     const existing = await this.getContactInfo();
     const [updated] = await db.update(contactInfo).set(data).where(eq(contactInfo.id, existing.id)).returning();
+    return updated;
+  }
+
+  async getSectionVisibility(): Promise<SectionVisibility[]> {
+    const sections = await db.select().from(sectionVisibility).orderBy(asc(sectionVisibility.sortOrder));
+    if (sections.length === 0) {
+      const defaults = [
+        { sectionKey: "hero", label: "Hero", visible: true, sortOrder: 0 },
+        { sectionKey: "services", label: "Services", visible: true, sortOrder: 1 },
+        { sectionKey: "portfolio", label: "Portfolio", visible: true, sortOrder: 2 },
+        { sectionKey: "about", label: "About / Team", visible: true, sortOrder: 3 },
+        { sectionKey: "testimonials", label: "Testimonials", visible: true, sortOrder: 4 },
+        { sectionKey: "blog", label: "Blog", visible: true, sortOrder: 5 },
+        { sectionKey: "contact", label: "Contact", visible: true, sortOrder: 6 },
+      ];
+      const created = await db.insert(sectionVisibility).values(defaults).returning();
+      return created.sort((a, b) => a.sortOrder - b.sortOrder);
+    }
+    return sections;
+  }
+
+  async updateSectionVisibility(sectionKey: string, visible: boolean): Promise<SectionVisibility | undefined> {
+    const [updated] = await db.update(sectionVisibility).set({ visible }).where(eq(sectionVisibility.sectionKey, sectionKey)).returning();
     return updated;
   }
 }

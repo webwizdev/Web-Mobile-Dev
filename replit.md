@@ -25,8 +25,9 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 
 ## Admin Panel (/admin)
 - **Login**: admin / fio2026 (configurable via ADMIN_USERNAME / ADMIN_PASSWORD env vars)
-- **Sections**: Hero, Stats, Services, Portfolio, Team, Testimonials, Blog, Footer, Messages
-- **Features**: Full CRUD (create, read, update, delete) for all content types
+- **Tabs**: Hero, Stats, Services, Portfolio, Team, Testimonials, Blog, Contact, Footer, Sections, Messages
+- **Features**: Full CRUD for all content types, section visibility toggles
+- **Section Visibility**: Admin can toggle sections on/off from the "Sections" tab; hidden sections won't render on the public homepage
 - **UI**: Tabbed interface with dialog-based editing forms
 
 ## API Routes
@@ -55,11 +56,15 @@ A professional portfolio/showcase website for FIO Creatives, a web and mobile ap
 - `POST/PATCH/DELETE /api/blog/:id` - CRUD blog posts
 - `PUT /api/footer` - Update footer content
 - `POST/PATCH/DELETE /api/footer-links/:id` - CRUD footer links
+- `GET /api/contact-info` - Get contact section info
+- `PUT /api/contact-info` - Update contact section info
+- `GET /api/section-visibility` - Get section visibility settings
+- `PUT /api/section-visibility/:sectionKey` - Toggle section visibility
 - `GET/DELETE /api/messages/:id` - View/delete contact messages
 
 ## Database
 - PostgreSQL with Drizzle ORM
-- Tables: users, hero_content, stats, services, projects, team_members, testimonials, blog_posts, contact_messages, footer_content, footer_links
+- Tables: users, hero_content, stats, services, projects, team_members, testimonials, blog_posts, contact_messages, footer_content, footer_links, contact_info, section_visibility
 - Schema defined in `shared/schema.ts` using `pgTable`
 - Connection via `server/db.ts` using Neon serverless driver
 - Auto-seeds on first run if hero_content table is empty (`server/seed.ts`)

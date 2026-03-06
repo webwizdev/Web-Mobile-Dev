@@ -367,5 +367,17 @@ export async function registerRoutes(
     res.json({ success: true });
   });
 
+  app.get("/api/section-visibility", async (_req, res) => {
+    res.json(await storage.getSectionVisibility());
+  });
+
+  app.put("/api/section-visibility/:sectionKey", requireAdmin, async (req, res) => {
+    const { visible } = req.body;
+    if (typeof visible !== "boolean") return res.status(400).json({ message: "visible must be boolean" });
+    const updated = await storage.updateSectionVisibility(req.params.sectionKey, visible);
+    if (!updated) return res.status(404).json({ message: "Section not found" });
+    res.json(updated);
+  });
+
   return httpServer;
 }
