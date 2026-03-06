@@ -36,8 +36,8 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
 export function ServicesSection() {
@@ -63,17 +63,18 @@ export function ServicesSection() {
             From concept to launch, we provide end-to-end digital solutions
             tailored to your business goals.
           </p>
+          <div className="mx-auto mt-4 h-1 w-20 rounded-full bg-gradient-to-r from-primary via-chart-2 to-primary/60" />
         </motion.div>
 
         {isLoading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="p-6 border-border/50">
-                <Skeleton className="w-12 h-12 rounded-md mb-5" />
+                <Skeleton className="w-12 h-12 rounded-xl mb-5" />
                 <Skeleton className="h-6 w-40 mb-3" />
                 <Skeleton className="h-4 w-full mb-2" />
                 <Skeleton className="h-4 w-3/4 mb-4" />
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Skeleton className="h-6 w-20 rounded-full" />
                   <Skeleton className="h-6 w-24 rounded-full" />
                 </div>
@@ -82,7 +83,7 @@ export function ServicesSection() {
           </div>
         ) : (
           <motion.div
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -93,10 +94,11 @@ export function ServicesSection() {
               return (
                 <motion.div key={service.id} variants={itemVariants}>
                   <Card
-                    className="p-6 h-full border-border/50 hover-elevate transition-all duration-300 group"
+                    className="relative overflow-visible p-6 h-full bg-card/80 backdrop-blur-sm border-border/50 hover-elevate transition-all duration-300 group hover:scale-[1.02] hover:shadow-lg"
                     data-testid={`card-service-${service.id}`}
                   >
-                    <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/15 transition-colors">
+                    <div className="absolute inset-x-0 top-0 h-[2px] rounded-t-md bg-gradient-to-r from-primary via-chart-2 to-primary/40" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-chart-2/20 flex items-center justify-center mb-5 group-hover:from-primary/30 group-hover:to-chart-2/30 transition-all duration-300">
                       <IconComp className="w-6 h-6 text-primary" />
                     </div>
                     <h3 className="text-xl font-semibold text-foreground mb-3">
@@ -109,7 +111,7 @@ export function ServicesSection() {
                       {service.features.map((feature) => (
                         <span
                           key={feature}
-                          className="text-xs font-medium px-2.5 py-1 rounded-full bg-muted text-muted-foreground"
+                          className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary"
                         >
                           {feature}
                         </span>

@@ -22,7 +22,7 @@ export function TestimonialsSection() {
   return (
     <section
       id="testimonials"
-      className="py-24 lg:py-32 bg-muted/30"
+      className="py-16 md:py-24 lg:py-32 bg-muted/30"
       data-testid="section-testimonials"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -43,10 +43,11 @@ export function TestimonialsSection() {
             Don't just take our word for it. Here's what the people we've worked
             with have to say.
           </p>
+          <div className="mt-4 mx-auto w-20 h-1 rounded-full bg-gradient-to-r from-primary to-chart-2" />
         </motion.div>
 
         {isLoading ? (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="p-6 lg:p-8 border-border/50">
                 <Skeleton className="w-8 h-8 mb-4" />
@@ -65,40 +66,49 @@ export function TestimonialsSection() {
           </div>
         ) : (
           <motion.div
-            className="grid md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
           >
-            {testimonials?.map((testimonial) => (
-              <motion.div key={testimonial.id} variants={itemVariants}>
-                <Card
-                  className="p-6 lg:p-8 h-full border-border/50"
-                  data-testid={`card-testimonial-${testimonial.id}`}
-                >
-                  <Quote className="w-8 h-8 text-primary/20 mb-4" />
-                  <p className="text-foreground leading-relaxed mb-6 text-base">
-                    "{testimonial.quote}"
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-10 h-10">
-                      <AvatarFallback
-                        className={`bg-gradient-to-br ${testimonial.color} text-white text-xs font-bold`}
-                      >
-                        {testimonial.initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-semibold text-foreground text-sm">
-                        {testimonial.name}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {testimonial.role}, {testimonial.company}
+            {testimonials?.map((testimonial, index) => (
+              <motion.div
+                key={testimonial.id}
+                variants={itemVariants}
+                className={index % 2 === 1 ? "md:mt-8" : ""}
+              >
+                <div className="relative group">
+                  <div className="absolute top-0 left-0 right-0 h-[2px] rounded-t-md bg-gradient-to-r from-primary via-chart-2 to-chart-4 z-10" />
+                  <Card
+                    className="p-6 lg:p-8 h-full border-border/50 transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg overflow-visible"
+                    data-testid={`card-testimonial-${testimonial.id}`}
+                  >
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-5">
+                      <Quote className="w-6 h-6 text-primary" />
+                    </div>
+                    <p className="text-foreground leading-relaxed mb-6 text-base">
+                      "{testimonial.quote}"
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-10 h-10 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
+                        <AvatarFallback
+                          className={`bg-gradient-to-br ${testimonial.color} text-white text-xs font-bold`}
+                        >
+                          {testimonial.initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-semibold text-foreground text-sm">
+                          {testimonial.name}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {testimonial.role}, {testimonial.company}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Card>
+                  </Card>
+                </div>
               </motion.div>
             ))}
           </motion.div>

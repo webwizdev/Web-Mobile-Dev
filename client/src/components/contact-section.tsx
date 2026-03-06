@@ -86,12 +86,22 @@ export function ContactSection() {
   return (
     <section
       id="contact"
-      className="py-24 lg:py-32 bg-muted/30"
+      className="py-16 md:py-24 lg:py-32 relative overflow-hidden"
       data-testid="section-contact"
     >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="absolute inset-0 bg-muted/30" />
+      <div
+        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+        style={{
+          backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)",
+          backgroundSize: "24px 24px",
+        }}
+      />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -106,9 +116,10 @@ export function ContactSection() {
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             {info?.sectionSubtitle || "Ready to start your next project? Drop us a message and we'll get back to you within 24 hours."}
           </p>
+          <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-gradient-to-r from-primary to-chart-2" />
         </motion.div>
 
-        <div className="grid lg:grid-cols-5 gap-8">
+        <div className="grid lg:grid-cols-5 gap-6 md:gap-8">
           <motion.div
             className="lg:col-span-3"
             initial={{ opacity: 0, x: -20 }}
@@ -116,162 +127,171 @@ export function ContactSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <Card className="p-6 lg:p-8 border-border/50">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-5"
-                  data-testid="form-contact"
-                >
-                  <div className="grid sm:grid-cols-2 gap-5">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="John Doe"
-                              {...field}
-                              data-testid="input-name"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="email"
-                              placeholder="john@example.com"
-                              {...field}
-                              data-testid="input-email"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-5">
-                    <FormField
-                      control={form.control}
-                      name="company"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Company (Optional)</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Your Company"
-                              {...field}
-                              value={field.value || ""}
-                              data-testid="input-company"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="service"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Service Interested In</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value || ""}
-                          >
-                            <FormControl>
-                              <SelectTrigger data-testid="select-service">
-                                <SelectValue placeholder="Select a service" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="web">Web Development</SelectItem>
-                              <SelectItem value="mobile">Mobile Development</SelectItem>
-                              <SelectItem value="design">UI/UX Design</SelectItem>
-                              <SelectItem value="strategy">Digital Strategy</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tell Us About Your Project</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Describe your project, goals, timeline, and budget range..."
-                            className="min-h-[120px] resize-none"
-                            {...field}
-                            data-testid="input-message"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="w-full sm:w-auto"
-                    data-testid="button-submit-contact"
+            <div className="relative rounded-xl p-[1px] bg-gradient-to-br from-primary/30 via-transparent to-chart-2/30">
+              <Card className="p-6 lg:p-8 border-0 bg-card/80 backdrop-blur-sm rounded-xl">
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-5"
+                    data-testid="form-contact"
                   >
-                    <Send className="w-4 h-4 mr-2" />
-                    Send Message
-                  </Button>
-                </form>
-              </Form>
-            </Card>
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="John Doe"
+                                className="rounded-xl focus:ring-2 focus:ring-primary/20"
+                                {...field}
+                                data-testid="input-name"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="email"
+                                placeholder="john@example.com"
+                                className="rounded-xl focus:ring-2 focus:ring-primary/20"
+                                {...field}
+                                data-testid="input-email"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <FormField
+                        control={form.control}
+                        name="company"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Company (Optional)</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Your Company"
+                                className="rounded-xl focus:ring-2 focus:ring-primary/20"
+                                {...field}
+                                value={field.value || ""}
+                                data-testid="input-company"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="service"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Service Interested In</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value || ""}
+                            >
+                              <FormControl>
+                                <SelectTrigger data-testid="select-service" className="rounded-xl focus:ring-2 focus:ring-primary/20">
+                                  <SelectValue placeholder="Select a service" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="web">Web Development</SelectItem>
+                                <SelectItem value="mobile">Mobile Development</SelectItem>
+                                <SelectItem value="design">UI/UX Design</SelectItem>
+                                <SelectItem value="strategy">Digital Strategy</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tell Us About Your Project</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Describe your project, goals, timeline, and budget range..."
+                              className="min-h-[120px] resize-none rounded-xl focus:ring-2 focus:ring-primary/20"
+                              {...field}
+                              data-testid="input-message"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="w-full sm:w-auto bg-gradient-to-r from-primary to-chart-2 border-0 text-primary-foreground"
+                      data-testid="button-submit-contact"
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </Button>
+                  </form>
+                </Form>
+              </Card>
+            </div>
           </motion.div>
 
           <motion.div
-            className="lg:col-span-2 space-y-6"
+            className="lg:col-span-2 space-y-4 md:space-y-6"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            {contactDetails.map((detail) => (
-              <a
+            {contactDetails.map((detail, index) => (
+              <motion.a
                 key={detail.label}
                 href={detail.href}
                 className="block"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
                 data-testid={`link-contact-${detail.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                <Card className="p-5 border-border/50 hover-elevate transition-all duration-300">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <detail.icon className="w-5 h-5 text-primary" />
+                <Card className="p-4 md:p-5 border-border/50 bg-card/80 backdrop-blur-sm hover-elevate transition-all duration-300">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-chart-2 flex items-center justify-center flex-shrink-0">
+                      <detail.icon className="w-5 h-5 text-primary-foreground" />
                     </div>
-                    <div>
-                      <div className="text-sm font-medium text-muted-foreground mb-1">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-muted-foreground mb-0.5">
                         {detail.label}
                       </div>
-                      <div className="font-medium text-foreground">
+                      <div className="font-medium text-foreground truncate">
                         {detail.value}
                       </div>
                     </div>
                   </div>
                 </Card>
-              </a>
+              </motion.a>
             ))}
           </motion.div>
         </div>
