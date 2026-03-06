@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Linkedin, Twitter, Instagram } from "lucide-react";
 import { SiGithub, SiDribbble } from "react-icons/si";
 import type { FooterContent, FooterLink } from "@shared/schema";
@@ -98,6 +99,14 @@ export function Footer() {
           >
             {content?.copyrightText || "2026 FIO Creatives. All rights reserved."}
           </p>
+          <div className="flex items-center gap-4">
+            <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-terms">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-privacy">
+              Privacy Policy
+            </Link>
+          </div>
           <p className="text-sm text-muted-foreground">
             {content?.locationText || "Made with passion in San Francisco"}
           </p>
