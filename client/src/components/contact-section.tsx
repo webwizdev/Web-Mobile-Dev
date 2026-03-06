@@ -77,7 +77,7 @@ export function ContactSection() {
     },
     {
       icon: MapPin,
-      label: "Visit Us",
+      label: "Address",
       value: info?.address || "123 Innovation Drive, San Francisco, CA",
       href: "#",
     },
