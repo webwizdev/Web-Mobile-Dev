@@ -273,26 +273,6 @@ export function ContactSection() {
                 </Card>
               </a>
             ))}
-
-            <Card className="p-6 border-border/50 bg-gradient-to-br from-primary/5 to-chart-3/5">
-              <h4 className="font-semibold text-foreground mb-2">
-                {info?.ctaTitle || "Prefer a quick chat?"}
-              </h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {info?.ctaDescription || "Book a free 30-minute consultation call to discuss your project requirements and explore how we can help bring your vision to life."}
-              </p>
-              {info?.ctaButtonUrl && info.ctaButtonUrl !== "#" ? (
-                <a href={info.ctaButtonUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="mt-4" data-testid="button-book-call">
-                    {info?.ctaButtonText || "Book a Call"}
-                  </Button>
-                </a>
-              ) : (
-                <Button variant="outline" className="mt-4" data-testid="button-book-call">
-                  {info?.ctaButtonText || "Book a Call"}
-                </Button>
-              )}
-            </Card>
           </motion.div>
         </div>
       </div>
