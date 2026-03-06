@@ -40,16 +40,24 @@ export async function registerRoutes(
 ): Promise<Server> {
   const SessionStore = MemoryStore(session);
 
+  const isProduction = process.env.NODE_ENV === "production" || process.env.REPLIT_DEPLOYMENT === "1";
+
+  if (isProduction) {
+    app.set("trust proxy", 1);
+  }
+
   app.use(
     session({
       secret: process.env.SESSION_SECRET || "fio-creatives-dev-key",
       resave: false,
       saveUninitialized: false,
       store: new SessionStore({ checkPeriod: 86400000 }),
+      proxy: isProduction,
       cookie: {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: "lax",
+        secure: isProduction,
       },
     })
   );
